@@ -42,9 +42,9 @@ PATH=$PATH:$dir
 cmd_exist () {
   command -v "$1" > /dev/null 2>&1 && return 0 || return 1
 }
-if [[ "$LESS_ADVANCED_PREPROCESSOR" = '' ]]; then
-   NOL_A_P=_NO_L_A_P
-fi
+# if [[ "$LESS_ADVANCED_PREPROCESSOR" = '' ]]; then
+#    NOL_A_P=_NO_L_A_P
+# fi
 
 filecmd() {
   file -L -s "$@"
@@ -141,22 +141,24 @@ filetype () {
   elif [[ "$type" = *Microsoft\ Office\ Document* && ("$name" = *.pp[st]) ]] ||
        [[ "$type" = *Microsoft\ Office\ PowerPoint* ]]; then
        return=" Microsoft PowerPoint Document"
-  elif [[ "$type" = *Microsoft\ Office\ Document* && ("$name" = *.xl[mst]) ]] || 
+  elif [[ "$type" = *Microsoft\ Office\ Document* && ("$name" = *.xl[mst]) ]] ||
        [[ "$type" = *Microsoft\ Excel* ]]; then
        return=" Microsoft Excel Document"
   elif [[ "$type" = *Microsoft\ Office\ Document* ]]; then
        return=" Microsoft Office Document"
        # Microsoft Office >= 2007
-  elif [[ ("$type" = *Zip\ archive* || "$type" =  Microsoft\ OOXML) && "$name" = *.do[ct][xm] ]] ||
+  elif [[ ("$type" = *Zip* || "$type" = *ZIP*) && ("$name" = *.zip) ]]; then
+    return=" Zip compressed Zip archive"
+  elif [[ ("$type" = *Zip\ archive* || "$type" =  *Microsoft\ OOXML*) && "$name" = *.do[ct][xm] ]] ||
        [[ "$type" = *Microsoft\ Word\ 2007* ]]; then
        return=" Microsoft Word 2007+"
-  elif [[ ("$type" = *Zip\ archive* || "$type" =  Microsoft\ OOXML) && "$name" = *.pp[st][xm] ]] ||
+  elif [[ ("$type" = *Zip\ archive* || "$type" =  *Microsoft\ OOXML*) && "$name" = *.pp[st][xm] ]] ||
        [[ "$type" = *Microsoft\ PowerPoint\ 2007* ]]; then
        return=" Microsoft PowerPoint 2007+"
-  elif [[ ("$type" = *Zip\ archive* || "$type" =  Microsoft\ OOXML) && "$name" = *.xl[st][xmb] ]] ||
+  elif [[ ("$type" = *Zip\ archive* || "$type" =  *Microsoft\ OOXML*) && "$name" = *.xl[st][xmb] ]] ||
        [[ "$type" = *Microsoft\ Excel\ 2007* ]]; then
        return=" Microsoft Excel 2007+"
-  elif [[ "$type" = *Zip\ archive* || "$type" =  Microsoft\ OOXML ]] ||
+  elif [[ "$type" = *Zip\ archive* || "$type" =  *Microsoft\ OOXML* ]] ||
        [[ "$type" = *Microsoft\ *\ 2007* ]]; then
        return=" Microsoft Office 2007"
        # MP3
@@ -176,8 +178,10 @@ filetype () {
        # Correct HTML Detection
   elif [[ ("$type" = *HTML* || "$type" = *ASCII*) && "$name" = *xml ]]; then
     return=" XML document text"
-  elif [[ "$type" = *XML* && "$name" = *html ]]; then
+  elif [[ ("$type" = *XML* || "$type" = *HTML*) && "$name" = *html ]]; then
     return=" HTML document text"
+  elif [[ "$type" = *Rich\ Text\ Format* && "$name" = *.rtf ]]; then
+    return=" Rich Text Format data"
   fi
 
   if [[ -n "$return" ]]; then
@@ -684,9 +688,11 @@ isfinal() {
     msg "append $sep to filename to view the perl source"
     istemp perldoc "$2"
   elif [[ "$1" = *\ script* ]]; then
-    cat "$2"
+    # cat "$2"
+    highlight "$2" --out-format xterm256 --quiet --force --style molokai
   elif [[ "$1" = *text\ executable* ]]; then
-    cat "$2"
+    # cat "$2"
+    highlight "$2" --out-format xterm256 --quiet --force --style molokai
   elif [[ "$1" = *PostScript$NOL_A_P* ]]; then
     if cmd_exist pstotext; then
       msg "append $sep to filename to view the postscript file"
@@ -709,7 +715,7 @@ isfinal() {
   elif [[ "$1" = *Jar\ archive* ]] && cmd_exist fastjar; then
     msg "use jar_file${sep}contained_file to view a file in the archive"
     nodash "fastjar -tf" "$2"
-  elif [[ "$1" = *Zip* || "$1" = *ZIP* || "$1" = *JAR* ]] && cmd_exist unzip; then
+  elif [[ "$1" = *Zip\ archive* || "$1" = *Zip* || "$1" = *ZIP* || "$1" = *JAR* ]] && cmd_exist unzip; then
     msg "use zip_file${sep}contained_file to view a file in the archive"
     istemp "unzip -lv" "$2"
   elif [[ "$1" = *RAR\ archive* ]]; then
@@ -722,7 +728,7 @@ isfinal() {
     elif cmd_exist bsdtar; then
       msg "use rar_file${sep}contained_file to view a file in the archive"
       istemp "bsdtar tvf" "$2"
-    fi 
+    fi
   elif [[ "$1" = *7-zip\ archive* || "$1" = *7z\ archive* ]] && cmd_exist 7za; then
     typeset res
     res=$(istemp "7za l" "$2")
@@ -771,13 +777,9 @@ isfinal() {
     msg "append $sep to filename to view the HTML source"
     parsehtml "$2"
   elif [[ "$1" = *PDF* ]] && cmd_exist pdftotext; then
-    if [[ "$PARSEHTML" = yes ]]; then
-      msg "append $sep to filename to view the PDF source"
-      istemp pdftotext -htmlmeta "$2" - | parsehtml
-    else
-      msg "append $sep to filename to view the PDF source"
-      istemp pdftotext "$2" -
-    fi
+    # msg "append $sep to filename to view the PDF source"
+    # istemp pdftotext "$2" -
+    istemp pdftotext -nopgbrk -layout "$2" - | sed 's/\xe2\x80\x8b//g'
   elif [[ "$PARSEHTML" = yes && "$1" = *PDF* ]] && cmd_exist pdftohtml; then
     msg "append $sep to filename to view the PDF source"
     t=$(nexttmp)
@@ -795,14 +797,9 @@ isfinal() {
   elif [[ "$1" = *DjVu* ]] && cmd_exist djvutxt; then
     msg "append $sep to filename to view the DjVu source"
     djvutxt "$2"
-  elif [[ "$1" = *Microsoft\ Word\ 2007* ]]; then
-    if cmd_exist docx2txt.pl; then
-      msg "append $sep to filename to view the raw word document"
-      docx2txt.pl "$2" -
-    else
-      msg "install docx2txt.pl to view human readable text"
-      cat "$2"
-    fi
+  elif [[ "$1" = *Microsoft\ Word\ 2007* ]] && cmd_exist docx2txt.pl; then
+    msg "append $sep to filename to view the raw word document"
+    docx2txt.pl "$2" -
   elif [[ "$1" = *OpenDocument\ Text* ]]; then
     if cmd_exist odt2txt; then
       msg "append $sep to filename to view the raw word document"
@@ -811,14 +808,9 @@ isfinal() {
       msg "install odt2txt to view human readable text"
       cat "$2"
     fi
-  elif [[ "$1" = *Microsoft\ Word\ 2007* ]]; then
-    if cmd_exist pandoc; then
-      msg "append $sep to filename to view the raw word document"
-      pandoc --from=docx --to=plain "$2"
-    else
-      msg "install pandoc to view human readable text"
-      cat "$2"
-    fi
+  elif [[ "$1" = *Microsoft\ Word\ 2007* ]] && cmd_exist pandoc; then
+    # msg "append $sep to filename to view the raw word document"
+    pandoc --from=docx --to=plain "$2"
   elif [[ "$1" = *OpenDocument\ Text* ]]; then
     if cmd_exist pandoc; then
       msg "append $sep to filename to view the raw word document"
@@ -850,13 +842,13 @@ isfinal() {
       cat "$2"
     fi
   elif [[ "$1" = *Rich\ Text\ Format$NOL_A_P* ]]  && cmd_exist unrtf; then
-    if [[ "$PARSEHTML" = yes ]]; then
-      msg "append $sep to filename to view the RTF source"
-      istemp "unrtf --html" "$2" | parsehtml -
-    else
-      msg "append $sep to filename to view the RTF source"
-      istemp "unrtf --text" "$2" | sed -e "s/^### .*//" | fmt -s
-    fi
+    # if [[ "$PARSEHTML" = yes ]]; then
+    #   msg "append $sep to filename to view the RTF source"
+    #   istemp "unrtf --html" "$2" | parsehtml -
+    # else
+    # msg "append $sep to filename to view the RTF source"
+    istemp "unrtf --text" "$2" | sed -e "s/^### .*//" | fmt -s
+    # fi
   elif [[ "$1" = *Excel\ 2007* ]] && cmd_exist git-xlsx-textconv.pl; then
     msg "append $sep to filename to view the spreadsheet source"
     git-xlsx-textconv.pl "$2"
@@ -875,7 +867,7 @@ isfinal() {
     "$1" = *Microsoft\ Word\ 2007* ||
     "$1" = *OpenDocument\ Text*  ]]; then
     if cmd_exist libreoffice; then
-      msg "append $sep to filename to view the raw word document"
+      # msg "append $sep to filename to view the raw word document"
       libreoffice --headless --cat "$2"
     else
       msg "install LibreOffice to view human readable text"
@@ -969,12 +961,16 @@ elif [[ "$1" = "mp3" ]]; then
   elif [[ "$1" = "image" || "$1" = "mp3" || "$1" = "audio" || "$1" = "video" ]] && cmd_exist exiftool; then
     msg "append $sep to filename to view the raw data"
     exiftool "$2"
-  elif [[ "$1" = "text" ]]; then
-    cat "$2"
+  elif [[ "$1" = "text" ]] && cmd_exist highlight; then
+    # cat "$2"
+    highlight "$2" --out-format xterm256 --quiet --force --style molokai
   else
     set "plain text" "$2"
   fi
   if [[ "$1" = *plain\ text* ]]; then
+    if cmd_exist highlight; then
+      highlight "$2" --out-format xterm256 --quiet --force --style molokai
+    fi
     if cmd_exist code2color; then
       code2color $PPID ${in_file:+"$in_file"} "$2"
       if [[ $? = 0 ]]; then
@@ -984,7 +980,7 @@ elif [[ "$1" = "mp3" ]]; then
   fi
   if [[ "$2" = - ]]; then
     cat
-  fi  
+  fi
 }
 
 IFS=$sep a="$@"
