@@ -29,6 +29,13 @@
 # Author:  Wolfgang Friebel, DESY (Wolfgang.Friebel AT desy.de)
 #
 #===============================================================================
+LESS_TERMCAP_mb=$(printf '\e[01;32m') # enter blinking mode - red
+LESS_TERMCAP_md=$(printf '\e[01;34m') # enter double-bright mode - bold, magenta
+LESS_TERMCAP_me=$(printf '\e[0m') # turn off all appearance modes (mb, md, so, us)
+LESS_TERMCAP_se=$(printf '\e[0m') # leave standout mode
+LESS_TERMCAP_so=$(printf '\e[01;33m') # enter standout mode - yellow
+LESS_TERMCAP_ue=$(printf '\e[0m') # leave underline mode
+LESS_TERMCAP_us=$(printf '\e[04;36m') # enter underline mode - cyan
 ( [[ -n 1 && -n 2 ]] ) > /dev/null 2>&1 || exec zsh -y --ksh-arrays -- "$0" ${1+"$@"}
 #setopt KSH_ARRAYS SH_WORD_SPLIT 2>/dev/null
 set +o noclobber
@@ -149,6 +156,10 @@ filetype () {
        # Microsoft Office >= 2007
   elif [[ ("$type" = *Zip* || "$type" = *ZIP*) && ("$name" = *.zip) ]]; then
     return=" Zip compressed Zip archive"
+  elif [[ "$type" = *troff* && "$name" = *.[1-9] ]]; then
+    return=" manpage"
+  elif [[ "$type" = *gzip\ compressed\ data* && "$name" = *.[1-9].gz ]]; then
+    return=" gzipman"
   elif [[ ("$type" = *Zip\ archive* || "$type" =  *Microsoft\ OOXML*) && "$name" = *.do[ct][xm] ]] ||
        [[ "$type" = *Microsoft\ Word\ 2007* ]]; then
        return=" Microsoft Word 2007+"
@@ -689,10 +700,10 @@ isfinal() {
     istemp perldoc "$2"
   elif [[ "$1" = *\ script* ]]; then
     # cat "$2"
-    highlight "$2" --out-format xterm256 --quiet --force --style molokai
+    highlight "$2" --out-format xterm256 --quiet --force --style wal
   elif [[ "$1" = *text\ executable* ]]; then
     # cat "$2"
-    highlight "$2" --out-format xterm256 --quiet --force --style molokai
+    highlight "$2" --out-format xterm256 --quiet --force --style wal
   elif [[ "$1" = *PostScript$NOL_A_P* ]]; then
     if cmd_exist pstotext; then
       msg "append $sep to filename to view the postscript file"
@@ -776,6 +787,11 @@ isfinal() {
   elif [[ "$PARSEHTML" = yes && "$1" = *HTML$NOL_A_P* ]]; then
     msg "append $sep to filename to view the HTML source"
     parsehtml "$2"
+  elif [[ "$1" = *manpage* ]]; then
+    # man "$(pwd)/$2"
+    istemp nroff -man "$2"
+  elif [[ "$1" = *gzipman* ]]; then
+    istemp zcat "$2" | nroff -man
   elif [[ "$1" = *PDF* ]] && cmd_exist pdftotext; then
     # msg "append $sep to filename to view the PDF source"
     # istemp pdftotext "$2" -
@@ -963,13 +979,13 @@ elif [[ "$1" = "mp3" ]]; then
     exiftool "$2"
   elif [[ "$1" = "text" ]] && cmd_exist highlight; then
     # cat "$2"
-    highlight "$2" --out-format xterm256 --quiet --force --style molokai
+    highlight "$2" --out-format xterm256 --quiet --force --style wal
   else
     set "plain text" "$2"
   fi
   if [[ "$1" = *plain\ text* ]]; then
     if cmd_exist highlight; then
-      highlight "$2" --out-format xterm256 --quiet --force --style molokai
+      highlight "$2" --out-format xterm256 --quiet --force --style wal
     fi
     if cmd_exist code2color; then
       code2color $PPID ${in_file:+"$in_file"} "$2"
