@@ -695,10 +695,12 @@ isfinal() {
     istemp perldoc "$2"
   elif [[ "$1" = *\ script* ]]; then
     # cat "$2"
-    highlight "$2" --out-format xterm256 --quiet --force --style wal
+    # highlight "$2" --out-format xterm256 --quiet --force --style wal
+    bat --style=changes --color=always "$2"
   elif [[ "$1" = *text\ executable* ]]; then
     # cat "$2"
-    highlight "$2" --out-format xterm256 --quiet --force --style wal
+    # highlight "$2" --out-format xterm256 --quiet --force --style wal
+    bat --style=changes --color=always "$2"
   elif [[ "$1" = *PostScript$NOL_A_P* ]]; then
     if cmd_exist pstotext; then
       msg "append $sep to filename to view the postscript file"
@@ -974,15 +976,17 @@ elif [[ "$1" = "mp3" ]]; then
   elif [[ "$1" = "image" || "$1" = "mp3" || "$1" = "audio" || "$1" = "video" ]] && cmd_exist exiftool; then
     msg "append $sep to filename to view the raw data"
     exiftool "$2"
-  elif [[ "$1" = "text" ]] && cmd_exist highlight; then
+  elif [[ "$1" = "text" ]] && cmd_exist bat; then
     # cat "$2"
-    highlight "$2" --out-format xterm256 --quiet --force --style wal
+    # highlight "$2" --out-format xterm256 --quiet --force --style wal
+    bat --style=changes --color=always "$2"
   else
     set "plain text" "$2"
   fi
   if [[ "$1" = *plain\ text* ]]; then
-    if cmd_exist highlight; then
-      highlight "$2" --out-format xterm256 --quiet --force --style wal
+    if cmd_exist bat; then
+      # highlight "$2" --out-format xterm256 --quiet --force --style wal
+      bat --style=changes --color=always "$2"
     fi
     if cmd_exist code2color; then
       code2color $PPID ${in_file:+"$in_file"} "$2"
