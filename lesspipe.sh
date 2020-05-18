@@ -39,7 +39,7 @@ dir=${dir%%lesspipe.sh*\%s}
 dir=${dir%%/}
 PATH=$PATH:$dir
 
-BAT_COMMAND="bat --color=always"
+BAT_COMMAND="bat --color=always --paging=never"
 
 cmd_exist() {
   command -v "$1" >/dev/null 2>&1 && return 0 || return 1
