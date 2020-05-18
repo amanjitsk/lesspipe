@@ -39,6 +39,8 @@ dir=${dir%%lesspipe.sh*\%s}
 dir=${dir%%/}
 PATH=$PATH:$dir
 
+BAT_COMMAND="bat --color=always"
+
 cmd_exist() {
   command -v "$1" >/dev/null 2>&1 && return 0 || return 1
 }
@@ -153,6 +155,8 @@ filetype() {
     return=" manpage"
   elif [[ "$type" = *text* && "$name" = *.md ]]; then
     return="markdown"
+  elif [[ "$type" = *PostScript* && "$name" = *.tex ]]; then
+    return="latex"
   elif [[ "$type" = *gzip\ compressed\ data* && "$name" = *.[1-9].gz ]]; then
     return=" gzipman"
   elif [[ ("$type" = *Zip\ archive* || "$type" = *Microsoft\ OOXML*) && "$name" = *.do[ct][xm] ]] ||
@@ -698,11 +702,11 @@ isfinal() {
   elif [[ "$1" = *\ script* ]]; then
     # cat "$2"
     # highlight "$2" --out-format xterm256 --quiet --force --style wal
-    bat --style=changes --color=always "$2"
+    $BAT_COMMAND "$2"
   elif [[ "$1" = *text\ executable* ]]; then
     # cat "$2"
     # highlight "$2" --out-format xterm256 --quiet --force --style wal
-    bat --style=changes --color=always "$2"
+    $BAT_COMMAND "$2"
   elif [[ "$1" = *PostScript$NOL_A_P* ]]; then
     if cmd_exist pstotext; then
       msg "append $sep to filename to view the postscript file"
@@ -791,6 +795,8 @@ isfinal() {
     istemp nroff -man "$2"
   elif [[ "$1" = *markdown* ]]; then
     istemp glow -s dark "$2"
+  elif [[ "$1" = *latex* ]]; then
+    istemp $BAT_COMMAND "$2"
   elif [[ "$1" = *gzipman* ]]; then
     istemp zcat "$2" | nroff -man
   elif [[ "$1" = *PDF* ]] && cmd_exist pdftotext; then
@@ -982,14 +988,14 @@ isfinal() {
   elif [[ "$1" = "text" ]] && cmd_exist bat; then
     # cat "$2"
     # highlight "$2" --out-format xterm256 --quiet --force --style wal
-    bat --style=changes --color=always "$2"
+    $BAT_COMMAND "$2"
   else
     set "plain text" "$2"
   fi
   if [[ "$1" = *plain\ text* ]]; then
     if cmd_exist bat; then
       # highlight "$2" --out-format xterm256 --quiet --force --style wal
-      bat --style=changes --color=always "$2"
+      $BAT_COMMAND "$2"
     fi
     if cmd_exist code2color; then
       code2color $PPID ${in_file:+"$in_file"} "$2"
