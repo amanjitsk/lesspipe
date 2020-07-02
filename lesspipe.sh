@@ -148,6 +148,10 @@ filetype() {
     return=" Microsoft Excel Document"
   elif [[ "$type" = *Microsoft\ Office\ Document* ]]; then
     return=" Microsoft Office Document"
+  elif [[ "$type" = *ASCII\ text,\ with\ CRLF\ line\ terminators* && ("$name" = *.tsv) ]]; then
+    return="TSV"
+  elif [[ "$type" = *CSV\ text* && ("$name" = *.csv) ]]; then
+    return="CSV"
     # Microsoft Office >= 2007
   elif [[ ("$type" = *Zip* || "$type" = *ZIP*) && ("$name" = *.zip) ]]; then
     return=" Zip compressed Zip archive"
@@ -627,11 +631,15 @@ isfinal() {
   if [[ "$1" = *No\ such* ]]; then
     exit 1
   elif [[ "$1" = *directory* ]]; then
-    cmd=(ls -lA $COLOR "$2")
-    if ! ls $COLOR >/dev/null 2>&1; then
-      cmd=(ls -lA -G "$2")
-      if ! ls -lA -G >/dev/null 2>&1; then
-        cmd=(ls -lA "$2")
+    if cmd_exist lsd; then
+      cmd=(lsd -lAh --icon=always --color=always "$2")
+    else
+      cmd=(ls -lA $COLOR "$2")
+      if ! ls $COLOR >/dev/null 2>&1; then
+        cmd=(ls -lA -G "$2")
+        if ! ls -lA -G >/dev/null 2>&1; then
+          cmd=(ls -lA "$2")
+        fi
       fi
     fi
     msg "This is a directory, showing the output of ${cmd[@]}"
@@ -795,6 +803,20 @@ isfinal() {
     istemp nroff -man "$2"
   elif [[ "$1" = *markdown* ]]; then
     istemp glow -s dark "$2"
+  elif [[ "$1" = "TSV" ]]; then
+    if cmd_exist xsv; then
+      istemp xsv fmt -d $'\t' "$2" | column -tns,
+    else
+      msg "Warning: this is not a good idea. Please install https://github.com/BurntSushi/xsv"
+      istemp column -tns$'\t' "$2"
+    fi
+  elif [[ "$1" = "CSV" ]]; then
+    if cmd_exist xsv; then
+      istemp xsv fmt "$2" | column -tns,
+    else
+      msg "Warning: this is not a good idea. Please install https://github.com/BurntSushi/xsv"
+      istemp column -tns, "$2"
+    fi
   elif [[ "$1" = *latex* ]]; then
     istemp $BAT_COMMAND "$2"
   elif [[ "$1" = *gzipman* ]]; then
