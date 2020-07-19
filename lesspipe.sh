@@ -800,7 +800,7 @@ isfinal() {
     parsehtml "$2"
   elif [[ "$1" = *manpage* ]]; then
     if cmd_exist batman; then
-      istemp batman --paging=never "$2"
+      istemp batman --color=always --paging=never "$2"
     else
       istemp nroff -man "$2"
     fi
