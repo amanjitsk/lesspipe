@@ -799,8 +799,11 @@ isfinal() {
     msg "append $sep to filename to view the HTML source"
     parsehtml "$2"
   elif [[ "$1" = *manpage* ]]; then
-    # man "$(pwd)/$2"
-    istemp nroff -man "$2"
+    if cmd_exist batman; then
+      istemp batman --paging=never "$2"
+    else
+      istemp nroff -man "$2"
+    fi
   elif [[ "$1" = *markdown* ]]; then
     istemp glow -s dark "$2"
   elif [[ "$1" = "TSV" ]]; then
