@@ -811,7 +811,7 @@ isfinal() {
     fi
   elif [[ "$1" = "CSV" ]]; then
     if cmd_exist xsv; then
-      istemp xsv fmt "$2" | column -tns,
+      istemp xsv table "$2"
     else
       msg "Warning: this is not a good idea. Please install https://github.com/BurntSushi/xsv"
       istemp column -tns, "$2"
