@@ -803,14 +803,18 @@ isfinal() {
   elif [[ "$1" = *markdown* ]]; then
     istemp glow -s dark "$2"
   elif [[ "$1" = "TSV" ]]; then
-    if cmd_exist xsv; then
+    if cmd_exist csview; then
+      istemp csview --style grid --tsv "$2"
+    elif cmd_exist xsv; then
       istemp xsv fmt -d $'\t' "$2" | column -tns,
     else
       msg "Warning: this is not a good idea. Please install https://github.com/BurntSushi/xsv"
       istemp column -tns$'\t' "$2"
     fi
   elif [[ "$1" = "CSV" ]]; then
-    if cmd_exist xsv; then
+    if cmd_exist csview; then
+      istemp csview --style grid "$2"
+    elif cmd_exist xsv; then
       istemp xsv table "$2"
     else
       msg "Warning: this is not a good idea. Please install https://github.com/BurntSushi/xsv"
