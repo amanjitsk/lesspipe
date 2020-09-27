@@ -152,6 +152,8 @@ filetype() {
     return="TSV"
   elif [[ "$type" = *CSV\ text* && ("$name" = *.csv) ]]; then
     return="CSV"
+  elif [[ "$type" = *JSON\ data* && ("$name" = *.json) ]]; then
+    return="JSON"
     # Microsoft Office >= 2007
   elif [[ ("$type" = *Zip* || "$type" = *ZIP*) && ("$name" = *.zip) ]]; then
     return=" Zip compressed Zip archive"
@@ -819,6 +821,14 @@ isfinal() {
     else
       msg "Warning: this is not a good idea. Please install https://github.com/BurntSushi/xsv"
       istemp column -tns, "$2"
+    fi
+  elif [[ "$1" = "JSON" ]]; then
+    if cmd_exist jq; then
+      istemp jq --color-output . "$2"
+    elif cmd_exist python3; then
+      istemp python3 -m json.tool -- "$2"
+    else
+      istemp python -m json.tool -- "$2"
     fi
   elif [[ "$1" = *latex* ]]; then
     istemp $BAT_COMMAND "$2"
