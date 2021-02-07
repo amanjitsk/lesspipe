@@ -2,7 +2,7 @@
 # lesspipe.sh, a preprocessor for less (version 1.83)
 #===============================================================================
 ### THIS FILE IS GENERATED FROM lesspipe.sh.in, PLEASE GET THE ZIP FILE
-### from https://github.com/wofr06/lesspipe.sh/archive/lesspipe.zip
+### from https://github.com/wofr06/lesspipe/archive/lesspipe.zip
 ### AND RUN configure TO GENERATE A lesspipe.sh THAT WORKS IN YOUR ENVIRONMENT
 #===============================================================================
 #
@@ -114,21 +114,10 @@ filetype() {
   if [[ "$1" = - ]]; then
     name="$filen"
   fi
-  if [[ ("$name" = *.br || "$name" = *.bro || "$name" = *.tbr) ]]; then
-    # In current format, brotli can only be detected by extension
-    echo " brotli compressed data"
-    return
-  fi
-  if [[ "$1" = - ]]; then
-    dd bs=40000 count=1 >"$tmpdir/file" 2>/dev/null
-    set "$tmpdir/file" "$2"
-  fi
-
-  typeset return
-
-  # file -b not supported by all versions of 'file'
-  type="$(filecmd "$1" | cut -d : -f 2-)"
-  if [[ "$type" = " empty" ]]; then
+  typeset type
+  # type=" $(filecmd -b "$1")" # not supported by all versions of 'file'
+  type=$(filecmd "$1" | cut -d : -f 2-)
+  if [[ "$type" = \ empty* ]]; then
     # exit if file returns "empty" (e.g., with "less archive:nonexisting_file")
     exit 1
     # Open Office
