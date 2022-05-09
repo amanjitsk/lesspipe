@@ -555,11 +555,6 @@ parsehtml() {
   if [[ "$PARSEHTML" = no ]]; then
     msg "No suitable tool for HTML parsing found, install one of html2text, elinks, links, lynx or w3m"
     return
-  elif cmd_exist html2text; then
-    if [[ "$1" = - ]]; then html2text; else html2text "$1"; fi
-  elif cmd_exist lynx; then
-    if [[ "$1" = - ]]; then set - -stdin; fi
-    lynx -dump -force_html "$1" && return
   elif cmd_exist w3m; then
     nodash "w3m -dump -T text/html" "$1"
   elif cmd_exist elinks; then
@@ -567,6 +562,11 @@ parsehtml() {
   elif cmd_exist links; then
     if [[ "$1" = - ]]; then set - -stdin; fi
     links -dump -force_html "$1"
+  elif cmd_exist html2text; then
+    if [[ "$1" = - ]]; then html2text; else html2text "$1"; fi
+  elif cmd_exist lynx; then
+    if [[ "$1" = - ]]; then set - -stdin; fi
+    lynx -dump -force_html "$1" && return
   fi
 }
 
@@ -797,7 +797,7 @@ isfinal() {
     if cmd_exist csview; then
       istemp csview --style grid --tsv "$2"
     elif cmd_exist xsv; then
-      istemp xsv fmt -d $'\t' "$2" | column -tns,
+      istemp xsv fmt -d $'\t' "$2" | xsv table
     else
       msg "Warning: this is not a good idea. Please install https://github.com/BurntSushi/xsv"
       istemp column -tns$'\t' "$2"
