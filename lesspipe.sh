@@ -792,7 +792,13 @@ isfinal() {
   elif [[ "$1" = *manpage* ]]; then
     istemp nroff -man "$2"
   elif [[ "$1" = *markdown* ]]; then
-    istemp glow "$2"
+    if cmd_exist mdcat; then
+      istemp mdcat "$2"
+    elif cmd_exist glow; then
+      istemp glow -s dark "$2"
+    else
+      istemp cat "$2"
+    fi
   elif [[ "$1" = "TSV" ]]; then
     if cmd_exist csview; then
       istemp csview --style grid --tsv "$2"
