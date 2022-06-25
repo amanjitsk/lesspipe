@@ -792,10 +792,10 @@ isfinal() {
   elif [[ "$1" = *manpage* ]]; then
     istemp nroff -man "$2"
   elif [[ "$1" = *markdown* ]]; then
-    if cmd_exist mdcat; then
+    if cmd_exist glow; then
+      istemp glow -s "$PYWAL_CACHE_DIR/colors-glow.json" -w "$(tput cols)" "$2"
+    elif cmd_exist mdcat; then
       istemp mdcat "$2"
-    elif cmd_exist glow; then
-      istemp glow -s dark "$2"
     else
       istemp cat "$2"
     fi
