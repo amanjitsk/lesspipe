@@ -137,7 +137,7 @@ filetype() {
     return=" Microsoft Excel Document"
   elif [[ "$type" = *Microsoft\ Office\ Document* ]]; then
     return=" Microsoft Office Document"
-  elif [[ "$type" = *ASCII\ text,\ with\ CRLF\ line\ terminators* && ("$name" = *.tsv) ]]; then
+  elif [[ ("$type" = *ASCII\ text* || "$type" = *UTF-8\ Unicode\ text*) && "$name" = *.tsv ]]; then
     return="TSV"
   elif [[ "$type" = *CSV\ text* && ("$name" = *.csv) ]]; then
     return="CSV"
