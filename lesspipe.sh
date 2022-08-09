@@ -556,9 +556,9 @@ parsehtml() {
     msg "No suitable tool for HTML parsing found, install one of html2text, elinks, links, lynx or w3m"
     return
   elif cmd_exist w3m; then
-    nodash "w3m -dump -T text/html" "$1"
+    nodash "w3m -dump -cols "$(tput cols)" -T text/html" "$1"
   elif cmd_exist elinks; then
-    nodash "elinks -dump -force-html" "$1"
+    nodash "elinks -dump -dump-width "$(tput cols)" -force-html" "$1"
   elif cmd_exist links; then
     if [[ "$1" = - ]]; then set - -stdin; fi
     links -dump -force_html "$1"
@@ -566,7 +566,7 @@ parsehtml() {
     if [[ "$1" = - ]]; then html2text; else html2text "$1"; fi
   elif cmd_exist lynx; then
     if [[ "$1" = - ]]; then set - -stdin; fi
-    lynx -dump -force_html "$1" && return
+    lynx -dump -width "$(tput cols)" -force_html "$1" && return
   fi
 }
 
