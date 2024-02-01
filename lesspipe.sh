@@ -150,7 +150,7 @@ filetype() {
         return=" manpage"
     elif [[ "$type" = *text* && "$name" = *.md ]]; then
         return="markdown"
-    elif [[ ("$type" = *JSON\ data* || "$type" = *UTF-8*) && "$name" = *.ipynb ]]; then
+    elif [[ ("$type" = *JSON\ data* || "$type" = *very\ long\ lines*) && "$name" = *.ipynb ]]; then
         return="Jupyter Notebook"
     elif [[ "$type" = *PostScript* && "$name" = *.tex ]]; then
         return="latex"
