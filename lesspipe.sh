@@ -811,7 +811,7 @@ isfinal() {
         fi
     elif [[ "$1" = "TSV" ]]; then
         if cmd_exist csview; then
-            istemp csview --style grid --tsv "$2"
+            istemp csview --style markdown --tsv "$2"
         elif cmd_exist xsv; then
             istemp xsv fmt -d $'\t' "$2" | xsv table
         else
@@ -820,7 +820,7 @@ isfinal() {
         fi
     elif [[ "$1" = "CSV" ]]; then
         if cmd_exist csview; then
-            istemp csview --style grid "$2"
+            istemp csview --style markdown "$2"
         elif cmd_exist xsv; then
             istemp xsv table "$2"
         else
