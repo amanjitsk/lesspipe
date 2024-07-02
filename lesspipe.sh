@@ -805,7 +805,7 @@ isfinal() {
         if cmd_exist euporie-preview; then
             istemp euporie-preview --page --max-notebook-width "$(tput cols)" "$2"
         elif cmd_exist jupytext && cmd_exist glow; then
-            istemp jupytext --to md "$2" | glow -s "$PYWAL_CACHE_DIR/colors-glow.json" -w "$(tput cols)" -
+            istemp jupytext --to md --output - "$2" | glow -s "$PYWAL_CACHE_DIR/colors-glow.json" -w "$(tput cols)" -
         else
             isfinal "JSON" "$2" "$3"
         fi
